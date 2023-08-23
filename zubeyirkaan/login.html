@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #79aeeb8c;
+            /* background-image: url("eul10222.jpg"); */
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 180px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            /* Set the container height */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo img {
+            width: 150px;
+        }
+
+        .container h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .container input {
+            width: 95%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+
+        .container button {
+            width: 100%;
+            padding: 10px;
+            background-color: #044fa5f8;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 3px;
+            margin-top: 30px;
+        }
+
+    </style>
+</head>
+
+<body>
+        <div class="container">
+            <div class="logo">
+                <img src="logo.png" alt="Logo">
+            </div>
+            <h2>European University of Lefke</h2>
+            <br>
+            <form action="register.php" method="post" id="loginForm">
+                <input type="text" name="username" placeholder="Username" required >
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" name="loginbtn">Login</button>
+                <input type="hidden" name="studentInfo" id="studentInfoInput">
+            </form>
+        </div>
+        <div id="studentInfo"></div>
+        <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Load the XML file
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState === 4 && this.status === 200) {
+                    // Parse the XML response
+                    var parser = new DOMParser();
+                    var xmlDoc = parser.parseFromString(this.responseText, "text/xml");
+
+                    // Get the login form element
+                    var loginForm = document.getElementById("loginForm");
+                    loginForm.addEventListener("submit", function(event) {
+                        event.preventDefault(); // Prevent form submission
+
+                        // Get the entered username and password
+                        var usernameInput = document.querySelector("input[name='username']");
+                        var passwordInput = document.querySelector("input[name='password']");
+                        var enteredUsername = usernameInput.value;
+                        var enteredPassword = passwordInput.value;
+
+                        // Extract student information from the XML
+                        var students = xmlDoc.getElementsByTagName("Student");
+
+                        var studentInfoDiv = document.getElementById("studentInfo");
+                        //studentInfoDiv.innerHTML = ""; // Clear previous student information
+
+                        var studentFound = false;
+
+                        for (var i = 0; i < students.length; i++) {
+                            var student = students[i];
+                            var studentNo = student.getElementsByTagName("StudentNo")[0].textContent;
+                            var name = student.getElementsByTagName("Name")[0].textContent;
+
+                            if (enteredUsername === name && enteredPassword === studentNo) {
+                                // Display the information for the matched student
+                                var surname = student.getElementsByTagName("Surname")[0].textContent;
+                                var program = student.getElementsByTagName("Program")[0].textContent;
+
+                                studentInfoDiv.innerHTML += "<p>Student No: " + studentNo + "</p>" +
+                                    "<p>Name: " + name +   "</p>" +
+                                    "<p>Surname: " + surname + "</p>" +
+                                    "<p>Program: " + program + "</p>";
+
+                                studentFound = true;
+
+                                // Construct the student information string
+                                var studentInfo =
+                                "<br>Student No: " + studentNo + "</br>" +
+                                "<br>Name: " + name + "</br>" +
+                                "<br>Surname: " + surname + "</br>" +
+                                "<br>Program: " + program + "</br>" +
+                                "<br>CGPA: 3.2</br>" +
+                                "<br>Semester: 4th</br>";
+
+                                // Set the student information as the value of the hidden input field
+                                var studentInfoInput = document.getElementById("studentInfoInput");
+                                studentInfoInput.value = studentInfo;
+
+                                // Submit the form
+                                loginForm.submit();
+
+                                break; // Exit the loop since a match is found
+                            }
+                        }
+
+                        if (!studentFound) {
+                            alert("Invalid username or password");
+                        }
+                    });
+                }
+            };
+            xhttp.open("GET", "student.xml", true); 
+            xhttp.send();
+        });
+    </script>
+
+</body>
+
+</html>
